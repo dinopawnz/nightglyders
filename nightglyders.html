@@ -47,7 +47,7 @@
   // ---- hosting ------------------------------------------------------------
   const BASE = "https://raw.githubusercontent.com/dinopawnz/nightglyders/main/";
   const PACKED = true;                 // models are meshopt + gzip (.glb.gz). false = plain .glb
-  const VER = "?v=3";                  // bump after re-uploading so Otherside fetches fresh copies
+  const VER = "?v=4";                  // bump after re-uploading so Otherside fetches fresh copies
   const HOST_CODE = "4593";            // G-L-Y-D on a phone keypad
   const AUTO_BUILD_MS = 0;             // e.g. 60000 = build by itself a minute after loading
   let SHOW_PADS = false;               // true = see every invisible collider / pad in pink
@@ -76,7 +76,7 @@
   const model = (file, attrs, parent) => el("m-model", Object.assign({ src: url(file), collide: "false", "cast-shadows": "false" }, attrs || {}), parent);
   const LOOK = () => (SHOW_PADS ? { color: "#ff00ff", opacity: 0.35 } : { color: "#000000", visible: "false" });
   const COLS = [];                     // every invisible collider (so "pads" can show them)
-  const colModel = (file, attrs, parent) => { const n = el("m-model", Object.assign({ src: url(file), collide: "true", "cast-shadows": "false" }, SHOW_PADS ? {} : { visible: "false" }, attrs || {}), parent); COLS.push(n); return n; };
+  const colModel = (file, attrs, parent) => { const n = el("m-model", Object.assign({ src: url(SHOW_PADS ? file + "v" : file), collide: "true", "cast-shadows": "false" }, attrs || {}), parent); n._f = file; COLS.push(n); return n; };
   function anim(target, attr, a, b, ms, opts) {
     const o = opts || {};
     const x = { attr, start: a, end: b, duration: Math.round(ms), loop: "true" };
@@ -192,7 +192,7 @@
     }
     if (cmd === "build") { hostMsg(build()); return; }
     if (cmd === "unbuild") { hostMsg(unbuild()); return; }
-    if (cmd === "pads") { SHOW_PADS = !SHOW_PADS; COLS.forEach((n) => { if (SHOW_PADS) { n.removeAttribute("visible"); } else n.setAttribute("visible", "false"); }); hostMsg("COLLIDERS " + (SHOW_PADS ? "SHOWN" : "HIDDEN")); return; }
+    if (cmd === "pads") { SHOW_PADS = !SHOW_PADS; COLS.forEach((n) => n.setAttribute("src", url(SHOW_PADS ? n._f + "v" : n._f))); hostMsg("COLLIDERS " + (SHOW_PADS ? "SHOWN (PINK)" : "HIDDEN")); return; }
     if (!GAME) { hostMsg("NOT BUILT - SEND build"); return; }
     let r = null; try { r = GAME.command(cmd, parts); } catch (e) { r = "ERROR: " + (e && e.message); }
     hostMsg(r || "UNKNOWN: " + cmd + " - TRY build / play / start / stop / end / again / rematch / rounds / music / lite / show / refresh / unbuild");
